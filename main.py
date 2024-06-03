@@ -11,7 +11,30 @@ def chat_with_system(client): # Define a function called chat_with_system that t
 
         response = client.chat.completions.create(
             model="killian",  # The model to use for completion
-            messages=conversation
+            messages=conversation,
+            extra_body={
+                "data_sources": [
+                    {
+                        "type": "azure_search",
+                        "parameters": {
+                            "endpoint": "https://killian-ehb-ai.search.windows.net",
+                            "index_name": "ehbsite",
+                            "semantic_configuration": "default",
+                            "query_type": "simple",
+                            "fields_mapping": {},
+                            "in_scope": True,
+                            "role_information": "You are an AI assistant that helps people find information.",
+                            "strictness": 3,
+                            "top_n_documents": 5,
+                            "authentication": {
+                                "type": "api_key",
+                                "key": "wHc2JVLoHwB2hzeOHOZJIeIZW219hBAuWaALyAXdVRAzSeC41wjF"
+                            },
+                            "key": "wHc2JVLoHwB2hzeOHOZJIeIZW219hBAuWaALyAXdVRAzSeC41wjF",
+                        }
+                    }
+                ],
+            },
         )
 
         system_response = response.choices[0].message.content
