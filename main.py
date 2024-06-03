@@ -1,6 +1,18 @@
-from openai import AzureOpenAI # Import the AzureOpenAI class from the openai module
+from dotenv import load_dotenv
+import os
+from openai import AzureOpenAI
 
-def chat_with_system(client): # Define a function called chat_with_system that takes in a client as an argument
+# Load environment variables
+load_dotenv()
+
+# Use environment variables
+client = AzureOpenAI(
+  azure_endpoint=os.getenv("AZURE_ENDPOINT"),
+  api_key=os.getenv("API_KEY"),
+  api_version="2024-02-01"
+)
+
+def chat_with_system(client):
     conversation = [
         {"role": "system", "content": "Welcome to the Erasmus Information Bot. How can I assist you with your Erasmus inquiries today?"},
     ]
@@ -10,7 +22,7 @@ def chat_with_system(client): # Define a function called chat_with_system that t
         conversation.append({"role": "user", "content": user_message})
 
         response = client.chat.completions.create(
-            model="killian",  # The model to use for completion
+            model="killian",
             messages=conversation,
             extra_body={
                 "data_sources": [
@@ -28,9 +40,9 @@ def chat_with_system(client): # Define a function called chat_with_system that t
                             "top_n_documents": 5,
                             "authentication": {
                                 "type": "api_key",
-                                "key": "wHc2JVLoHwB2hzeOHOZJIeIZW219hBAuWaALyAXdVRAzSeC41wjF"
+                                "key": os.getenv("SEARCH_API_KEY")
                             },
-                            "key": "wHc2JVLoHwB2hzeOHOZJIeIZW219hBAuWaALyAXdVRAzSeC41wjF",
+                            "key": os.getenv("SEARCH_API_KEY"),
                         }
                     }
                 ],
@@ -43,12 +55,6 @@ def chat_with_system(client): # Define a function called chat_with_system that t
         if user_message.lower() == "stop":
             break
 
-        conversation.append({"role": "assistant", "content": system_response})
-
-client = AzureOpenAI(
-  azure_endpoint="https://killian-ehb-ai.openai.azure.com/", # The endpoint of the Azure OpenAI API
-  api_key="8154f05ed6f94ea68f86c3610c13e702",  # The API key of the Azure OpenAI API
-  api_version="2024-02-01" # The API version of the Azure OpenAI API
-)
+        conversation.append({"role": "assistant", "content": systemResponse})
 
 chat_with_system(client)
