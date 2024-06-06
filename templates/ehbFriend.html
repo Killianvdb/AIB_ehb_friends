@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with ErasmusBot</title>
+    <link rel="stylesheet" href="/static/ehbFriend.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <!-- Messages will be displayed here -->
+        </div>
+        <form id="chat-form">
+            <input type="text" id="message" name="message" required placeholder="Type your message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.querySelector('#chat-form');
+        const chatBox = document.getElementById('chat-box');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const message = document.getElementById('message').value;
+            document.getElementById('message').value = ''; // Clear input after sending
+            const userMessage = `<div class="message user-message">${message}</div>`;
+            chatBox.innerHTML += userMessage; // Display user message
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({message: message})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.response === "This question is not about Erasmushogeschool Brussel (EHB).") {
+                    const botResponse = `<div class="message bot-message" style="color: red;">${data.response}</div>`;
+                    chatBox.innerHTML += botResponse; // Display specific response for non-relevance in red
+                } else {
+                    // Format the response to display it as a list if it contains multiple items
+                    const formattedResponse = formatResponse(data.response);
+                    const botResponse = `<div class="message bot-message">${formattedResponse}</div>`;
+                    chatBox.innerHTML += botResponse; // Display normal bot response
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Function to format response into a more readable list format if applicable
+        function formatResponse(response) {
+            if (response.includes('-')) {  // Check if the response seems to include list items
+                const items = response.split('-');
+                let listContent = '<ul>';
+                for (let i = 1; i < items.length; i++) {  // Start from 1 to skip before first '-'
+                    listContent += `<li>${items[i].trim()}</li>`;
+                }
+                listContent += '</ul>';
+                return items[0] + listContent;  // Append the first part of the response before the list starts
+            }
+            return response;  // Return the original response if it doesn't contain list items
+        }
+    </script>
+</body>
+</html>

@@ -55,6 +55,6 @@ def chat_with_system(client):
         if user_message.lower() == "stop":
             break
 
-        conversation.append({"role": "assistant", "content": systemResponse})
+        conversation.append({"role": "assistant", "content": system_response})
 
 chat_with_system(client)
