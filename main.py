@@ -36,8 +36,8 @@ def chat_with_system(client):
                             "fields_mapping": {},
                             "in_scope": True,
                             "role_information": "You are an AI assistant that helps people find information.",
-                            "strictness": 3,
-                            "top_n_documents": 5,
+                            "strictness": 10,
+                            "top_n_documents": 128,
                             "authentication": {
                                 "type": "api_key",
                                 "key": os.getenv("SEARCH_API_KEY")

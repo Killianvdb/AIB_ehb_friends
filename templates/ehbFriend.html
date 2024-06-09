@@ -37,7 +37,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                if(data.response === "This question is not about Erasmushogeschool Brussel (EHB).") {
+                if(data.response === "BADEHB") {
                     const botResponse = `<div class="message bot-message" style="color: red;">${data.response}</div>`;
                     chatBox.innerHTML += botResponse; // Display specific response for non-relevance in red
                 } else {
