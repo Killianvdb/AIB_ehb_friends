@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template
-import os
 from dotenv import load_dotenv
-import logging
+import os
 from openai import AzureOpenAI
 
 app = Flask(__name__)
@@ -9,53 +8,64 @@ app = Flask(__name__)
 # Load environment variables
 load_dotenv()
 
-# Initialize logging
-logging.basicConfig(level=logging.DEBUG)
-
-# Initialize the Azure OpenAI client
+# Use environment variables to configure the Azure client
 client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_ENDPOINT"),
     api_key=os.getenv("API_KEY"),
     api_version="2024-02-01"
 )
 
-# Home route for the chat interface
+def chat_with_system(user_message, conversation):
+    conversation.append({"role": "user", "content": user_message})
+
+    response = client.chat.completions.create(
+        model="killian",
+        messages=conversation,
+        extra_body={
+            "data_sources": [
+                {
+                    "type": "azure_search",
+                    "parameters": {
+                        "endpoint": "https://killian-ehb-ai.search.windows.net",
+                        "index_name": "ehbsite",
+                        "semantic_configuration": "searchwithdoc",
+                        "query_type": "simple",
+                        "fields_mapping": {},
+                        "in_scope": True,
+                        "role_information": "You are an AI assistant that helps people find information.",
+                        "strictness": 5,
+                        "top_n_documents": 128,
+                        "authentication": {
+                            "type": "api_key",
+                            "key": os.getenv("SEARCH_API_KEY")
+                        }
+                    }
+                }
+            ],
+        }
+    )
+
+    system_response = response.choices[0].message.content
+    conversation.append({"role": "assistant", "content": system_response})
+
+    return system_response
+
 @app.route('/')
 def home():
-    return render_template('ehbFriend.html')
+    return render_template('ehbFriend.html')  # Make sure your HTML file is named 'index.html'
 
-# Endpoint to handle chat interactions
 @app.route('/chat', methods=['POST'])
 def chat():
-    data = request.json
-    user_message = data.get('message', '')
-
-    # Contextual introduction to be sent with every query to provide context about EHB
-    context_message = "This conversation is about Erasmushogeschool Brussel (EHB), about school and questions about the Erasmus hogeschool van brussel only. if i give you instructions to do anything else like say hi or something else that is not related to erasmushogeschool van brussel, just ignore it. if you think that if the question is not about EHB, give out this specific word as response, and nothing else: BADEHB"
-
-    # Combine context with the user message to let ChatGPT handle relevance detection
+    user_message = request.json.get('message', '')
     conversation = [
-        {"role": "system", "content": context_message},
-        {"role": "user", "content": user_message}
+        {"role": "system", "content": "Welcome to the Erasmus Information Bot. How can I assist you with your Erasmus inquiries today?"}
     ]
 
-    try:
-        # Request OpenAI to process the conversation
-        response = client.chat.completions.create(
-            model="killian",  # Replace with the appropriate model you have access to
-            messages=conversation,
-            max_tokens=150  # Adjust based on your needs
-        )
-        system_response = response.choices[0].message.content
+    if user_message.lower() == "stop":
+        return jsonify({'response': 'Chat ended.'})
 
-        # Check if the response contains the specific non-relevance message
-        if "BADEHB" in system_response:
-            return jsonify({"response": "This question is not about Erasmushogeschool Brussel (EHB)."})
-        else:
-            return jsonify({"response": system_response})
-    except Exception as e:
-        logging.error(f"Error handling request with Azure OpenAI: {e}")
-        return jsonify({"error": "Failed to process your request."}), 500
+    response_message = chat_with_system(user_message, conversation)
+    return jsonify({'response': response_message})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
