@@ -18,38 +18,42 @@
     </div>
 
     <script>
-        document.getElementById('chat-form').onsubmit = function(event) {
-            event.preventDefault();  // Prevent the form from submitting through the browser
+document.getElementById('chat-form').onsubmit = function(event) {
+    event.preventDefault();  // Prevent the form from submitting through the browser
+
+    var messageBox = document.getElementById('message');
+    var chatBox = document.getElementById('chat-box');
+    var userMessage = messageBox.value;
     
-            var messageBox = document.getElementById('message');
-            var chatBox = document.getElementById('chat-box');
-            var userMessage = messageBox.value;
+    // Display user's message in chat box
+    chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/chat', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            // Replace the unwanted sentence with an empty string
+            var modifiedResponse = response.response.replace("Title: Overslaan en naar de inhoud gaan", "");
             
-            // Display user's message in chat box
-            chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
-    
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/chat', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    // Display bot's response in chat box
-                    chatBox.innerHTML += '<div class="bot-message">' + response.response + '</div>';
-                    // Scroll chat box to the bottom
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                } else {
-                    // Handle errors here if needed
-                    chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
-                }
-            };
-    
-            // Prepare JSON data to send with POST
-            var data = JSON.stringify({message: userMessage});
-            xhr.send(data);
-            // Clear the message input box
-            messageBox.value = '';
-        };
+            // Display bot's response in chat box
+            chatBox.innerHTML += '<div class="bot-message">' + modifiedResponse + '</div>';
+            // Scroll chat box to the bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } else {
+            // Handle errors here if needed
+            chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
+        }
+    };
+
+    // Prepare JSON data to send with POST
+    var data = JSON.stringify({message: userMessage});
+    xhr.send(data);
+    // Clear the message input box
+    messageBox.value = '';
+};
+
     </script>
     
 </body>
