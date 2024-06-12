@@ -17,7 +17,7 @@ client = AzureOpenAI(
 
 def chat_with_system(user_message, conversation):
     # Adding a context or extra information to the user's message before sending it to Azure
-    contextual_message = "User asked: " + user_message + "be as detailed as possible, don't mention docs used"
+    contextual_message = "User asked: " + user_message + "be as detailed as possible, don't begin your awnser with based on retrieved documents, just respond to the question, respond a good long prompt and keep a context that we talk about Erasmus hogeschool van Brussels"
 
     # Append the contextual message instead of the raw user message
     conversation.append({"role": "user", "content": contextual_message})
@@ -31,7 +31,7 @@ def chat_with_system(user_message, conversation):
                     "type": "azure_search",
                     "parameters": {
                         "endpoint": "https://killian-ehb-ai.search.windows.net",
-                        "index_name": "ehbsite-index",
+                        "index_name": "ehbsite",
                         "semantic_configuration": "default",
                         "query_type": "simple",
                         "fields_mapping": {},

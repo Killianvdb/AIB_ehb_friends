@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/static/ehbFriend.css">
 </head>
 <body>
+    <img src="/resources/ehb.png" alt="Site Logo" id="page-logo">
+
     <div class="chat-container">
         <div class="chat-box" id="chat-box">
             <!-- Messages will be displayed here -->
@@ -72,50 +74,50 @@
         };
     
         document.getElementById('chat-form').onsubmit = function(event) {
-            event.preventDefault();  // Prevent the form from submitting through the browser
-    
-            var messageBox = document.getElementById('message');
-            var chatBox = document.getElementById('chat-box');
-            var userMessage = messageBox.value;
-    
-            // Display user's message in the chat box
-            chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
-    
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/chat', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var modifiedResponse = response.response.replace("Title: Overslaan en naar de inhoud gaan", "");
-    
-                    // Replace the "Id:" prefix and process document IDs to generate concatenated links
-                    modifiedResponse = modifiedResponse.replace(/Id: ((?:\[(doc\d+)\])+)/g, function(match, idGroup) {
-                        return idGroup.match(/\[(doc\d+)\]/g).map(function(docMatch) {
-                            var docId = docMatch.slice(1, -1);  // Extract the document ID without brackets
-                            if (docFilenameMap[docId]) {
-                                return `<a href="/doc/${docId}">${docFilenameMap[docId]}</a>`;
-                            }
-                            return "Document not found";  // Handle missing document IDs gracefully
-                        }).join('');  // Concatenate all links without any separator
-                    });
-    
-                    // Display bot's response in the chat box
-                    chatBox.innerHTML += '<div class="bot-message">' + modifiedResponse + '</div>';
-                    // Automatically scroll to the bottom of the chat box
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                } else {
-                    // Handle errors if the communication fails
-                    chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
-                }
-            };
-    
-            // Prepare JSON data to send with POST
-            var data = JSON.stringify({message: userMessage});
-            xhr.send(data);
-            // Clear the message input box
-            messageBox.value = '';
+        event.preventDefault();  // Prevent form submission through the browser
+
+        var messageBox = document.getElementById('message');
+        var chatBox = document.getElementById('chat-box');
+        var userMessage = messageBox.value;
+
+        // Display user's message in the chat box
+        chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/chat', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                var modifiedResponse = response.response.replace("Title: Overslaen en naar de inhoud gaan", "");
+
+                // Handle and replace "Id:" followed by IDs
+                modifiedResponse = modifiedResponse.replace(/Id: ((?:\[(doc\d+)\])+)/g, function(match, idGroup) {
+                    return idGroup.match(/\[(doc\d+)\]/g).map(docMatch => {
+                        var docId = docMatch.slice(1, -1);  // Extract the document ID
+                        return docFilenameMap[docId] ? `<a href="/doc/${docId}">${docFilenameMap[docId]}</a>` : "";
+                    }).join('');
+                });
+
+                // Remove any leftover [docX] tags that weren't replaced
+                modifiedResponse = modifiedResponse.replace(/\[\w+\]/g, "");
+
+                // Display bot's response in the chat box
+                chatBox.innerHTML += '<div class="bot-message">' + modifiedResponse + '</div>';
+                // Scroll to the bottom of the chat box
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                // Display an error message if communication fails
+                chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
+            }
         };
+
+        // Send JSON data with POST
+        var data = JSON.stringify({message: userMessage});
+        xhr.send(data);
+        // Clear the message input box after sending
+        messageBox.value = '';
+    };
     </script>
     
     
