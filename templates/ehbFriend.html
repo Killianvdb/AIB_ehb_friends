@@ -18,43 +18,106 @@
     </div>
 
     <script>
-document.getElementById('chat-form').onsubmit = function(event) {
-    event.preventDefault();  // Prevent the form from submitting through the browser
-
-    var messageBox = document.getElementById('message');
-    var chatBox = document.getElementById('chat-box');
-    var userMessage = messageBox.value;
+        // Document ID to Filename mappings
+        const docFilenameMap = {
+            "doc1": "toelatingsvoorwaarden.html",
+            "doc2": "wat-kost-het.html",
+            "doc3": "wat-kost-het.html",
+            "doc4": "career-center.html",
+            "doc5": "contact.html",
+            "doc6": "info-voor-studiekiezers-ouders.html",
+            "doc7": "info-voor-studiekiezers-ouders.html",
+            "doc8": "info-voor-studiekiezers-ouders.html",
+            "doc9": "info-voor-studiekiezers-ouders.html",
+            "doc10": "infomomenten.html",
+            "doc11": "opleidingen_technologisch-verpleegkundige.html",
+            "doc12": "opleidingen_technologisch-verpleegkundige.html",
+            "doc13": "opleidingen_technologisch-verpleegkundige.html",
+            "doc14": "opleidingen_toerisme-recreatiemanagement.html",
+            "doc15": "opleidingen_toerisme-recreatiemanagement.html",
+            "doc16": "opleidingen_toerisme-recreatiemanagement.html",
+            "doc17": "opleidingen_tourism-leisure-basics.html",
+            "doc18": "opleidingen_tourism-leisure-basics.html",
+            "doc19": "opleidingen_verpleegkunde.html",
+            "doc20": "opleidingen_voedings-dieetkunde.html",
+            "doc21": "opleidingen_vroedkunde.html",
+            "doc22": "opleidingen_wat-zeg-jij.html",
+            "doc23": "opleidingen_accounting-administration-e-learning.html",
+            "doc24": "opleidingen_accounting-administration-e-learning.html",
+            "doc25": "opleidingen_aan-de-slag-met-generatieve-ai-3-10-2024.html",
+            "doc26": "opleidingen_applied-bio-informatics-research-diagnostics.html",
+            "doc27": "opleidingen_applied-bio-informatics-research-diagnostics.html",
+            "doc28": "opleidingen_artificial-intelligence-project-24-25.html",
+            "doc29": "opleidingen_attest-rooms-katholieke-godsdienst-24-25.html",
+            "doc30": "opleidingen_attest-rooms-katholieke-godsdienst-24-25.html",
+            "doc31": "opleidingen_basisvorming-kwaliteitsvol-pedagogisch-werken-met-jonge-kinderen-24-25.html",
+            "doc32": "opleidingen_bedrijfsverpleegkunde.html",
+            "doc33": "opleidingen_big-data-iot-24-25.html",
+            "doc34": "opleidingen_boekhouden-voor-werknemers-24-25.html",
+            "doc35": "opleidingen_boekhouden-voor-werknemers-24-25.html",
+            "doc36": "opleidingen_chatgpt-excel-24-10-2024.html",
+            "doc37": "opleidingen_communicatie.html",
+            "doc38": "opleidingen_communicatie.html",
+            "doc39": "opleidingen_coding.html",
+            "doc40": "opleidingen_cosmetic-sciences.html",
+            "doc41": "opleidingen_cybersecurity-ethical-hacking.html",
+            "doc42": "opleidingen_diabeteseducator.html",
+            "doc43": "opleidingen_diabeteseducator.html",
+            "doc44": "opleidingen_diversiteit-gelijkwaardigheid-inclusie-en-het-jonge-kind-24-25.html",
+            "doc45": "opleidingen_dramatische-kunsten.html",
+            "doc46": "opleidingen_educatieve-opleidingen-de-kunsten.html",
+            "doc47": "opleidingen_educatieve-opleidingen-de-kunsten.html",
+            "doc48": "opleidingen_elektromechanische-systemen.html",
+            "doc49": "opleidingen_forensisch-verpleegkundig-expert.html"
+        };
     
-    // Display user's message in chat box
-    chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/chat', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            // Replace the unwanted sentence with an empty string
-            var modifiedResponse = response.response.replace("Title: Overslaan en naar de inhoud gaan", "");
-            
-            // Display bot's response in chat box
-            chatBox.innerHTML += '<div class="bot-message">' + modifiedResponse + '</div>';
-            // Scroll chat box to the bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
-        } else {
-            // Handle errors here if needed
-            chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
-        }
-    };
-
-    // Prepare JSON data to send with POST
-    var data = JSON.stringify({message: userMessage});
-    xhr.send(data);
-    // Clear the message input box
-    messageBox.value = '';
-};
-
+        document.getElementById('chat-form').onsubmit = function(event) {
+            event.preventDefault();  // Prevent the form from submitting through the browser
+    
+            var messageBox = document.getElementById('message');
+            var chatBox = document.getElementById('chat-box');
+            var userMessage = messageBox.value;
+    
+            // Display user's message in the chat box
+            chatBox.innerHTML += '<div class="user-message">' + userMessage + '</div>';
+    
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/chat', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var modifiedResponse = response.response.replace("Title: Overslaan en naar de inhoud gaan", "");
+    
+                    // Replace the "Id:" prefix and process document IDs to generate concatenated links
+                    modifiedResponse = modifiedResponse.replace(/Id: ((?:\[(doc\d+)\])+)/g, function(match, idGroup) {
+                        return idGroup.match(/\[(doc\d+)\]/g).map(function(docMatch) {
+                            var docId = docMatch.slice(1, -1);  // Extract the document ID without brackets
+                            if (docFilenameMap[docId]) {
+                                return `<a href="/doc/${docId}">${docFilenameMap[docId]}</a>`;
+                            }
+                            return "Document not found";  // Handle missing document IDs gracefully
+                        }).join('');  // Concatenate all links without any separator
+                    });
+    
+                    // Display bot's response in the chat box
+                    chatBox.innerHTML += '<div class="bot-message">' + modifiedResponse + '</div>';
+                    // Automatically scroll to the bottom of the chat box
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    // Handle errors if the communication fails
+                    chatBox.innerHTML += '<div class="error-message">Error communicating with the bot.</div>';
+                }
+            };
+    
+            // Prepare JSON data to send with POST
+            var data = JSON.stringify({message: userMessage});
+            xhr.send(data);
+            // Clear the message input box
+            messageBox.value = '';
+        };
     </script>
+    
     
 </body>
 </html>
