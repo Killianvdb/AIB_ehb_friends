@@ -3,7 +3,11 @@ services:
   web:
     build: .
     ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    command: python app.py
+      - "5000:5000"  # Map TCP port 5008 in the container to port 5000 on the Docker host.
+    environment:
+      - AZURE_ENDPOINT=${AZURE_ENDPOINT}
+      - API_KEY=${API_KEY}
+      - SEARCH_API_KEY=${SEARCH_API_KEY}
+    volumes:
+      - .:/app  # Mount the current directory on the host to /app inside the container
+    restart: always
