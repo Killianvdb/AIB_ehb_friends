@@ -17,7 +17,7 @@ client = AzureOpenAI(
 
 def chat_with_system(user_message, conversation):
     # Adding a context or extra information to the user's message before sending it to Azure
-    contextual_message = "User asked: " + user_message + "be as detailed as possible, don't begin your awnser with based on retrieved documents, just respond to the question, respond a good long prompt and keep a context that we talk about Erasmus hogeschool van Brussels"
+    contextual_message = "User asked: " + user_message + "be as detailed as possible, don't begin your awnser with based on retrieved documents, just respond to the question, respond a good long prompt and keep a context that we talk about Erasmus hogeschool van Brussels, if you think the question isn't about erasmushogeschool, ask to ask a question about erasmushogeschool van Brussels, act as a personel of erasmushogeschool, don't awnser questions non related to erasmushogeschool van brussel, also respond in another language if there is another language in the prompt given"
 
     # Append the contextual message instead of the raw user message
     conversation.append({"role": "user", "content": contextual_message})
@@ -37,8 +37,8 @@ def chat_with_system(user_message, conversation):
                         "fields_mapping": {},
                         "in_scope": True,
                         "role_information": "You are an AI assistant that helps people find information.",
-                        "strictness": 5,
-                        "top_n_documents": 128,
+                        "strictness": 3,
+                        "top_n_documents": 5,
                         "authentication": {
                             "type": "api_key",
                             "key": os.getenv("SEARCH_API_KEY")

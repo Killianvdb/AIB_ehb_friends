@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/ehbFriend.css">
 </head>
 <body>
-    <img src="/resources/ehb.png" alt="Site Logo" id="page-logo">
+    <img src="/static/logo-ehb-small.svg" alt="Site Logo" id="page-logo">
 
     <div class="chat-container">
         <div class="chat-box" id="chat-box">
@@ -20,6 +20,14 @@
     </div>
 
     <script>
+
+        window.onload = function() {
+            var chatBox = document.getElementById('chat-box');
+            var botGreeting = "Hi I'm EHBfriendbot, your Artificial Assistant. If you have questions about EHB, the Erasmushogeschool Brussel, don't hesitate to ask questions!";
+            chatBox.innerHTML += '<div class="bot-message">' + botGreeting + '</div>'; // Append the greeting message as soon as the page loads
+        };
+
+
         // Document ID to Filename mappings
         const docFilenameMap = {
             "doc1": "toelatingsvoorwaarden.html",
